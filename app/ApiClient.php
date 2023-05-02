@@ -2,7 +2,7 @@
 
 namespace App;
 
-use App\Model\Gif;
+use App\Models\Gif;
 use GuzzleHttp\Client;
 
 class ApiClient
@@ -12,7 +12,6 @@ class ApiClient
     private string $apiKey;
     private string $rating;
     private array $info;
-    private array $gifsToDisplay = [];
 
     public function __construct(int $limit = 5)
     {
@@ -36,7 +35,7 @@ class ApiClient
 
     public function showRandom(): array
     {
-        $response = $this->client->request('GET', "random?api_key={$this->apiKey}");
+        $response = $this->client->request('GET', 'random?', $this->info);
         return $this->getGifs($response);
     }
 
@@ -51,14 +50,20 @@ class ApiClient
     private function getGifs(object $response): array
     {
         $gifsData = json_decode($response->getBody()->getContents())->data;
-        foreach ($gifsData as $gif)
+        $gifsToDisplay = [];
+
+        foreach ($gifsData as $giphy)
         {
-            $this->gifsToDisplay[] = new Gif(
-                $gif->title,
-                $gif->username,
-                $gif->images->original->url
-            );
+            $gifsToDisplay[] = $this->createModel($giphy);
         }
-        return $this->gifsToDisplay;
+        return $gifsToDisplay;
+    }
+
+    private function createModel(\stdClass $giphy): Gif
+    {
+        return new Gif(
+            $giphy->title,
+            $giphy->images->original->url
+        );
     }
 }

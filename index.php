@@ -2,8 +2,7 @@
 
 require_once 'vendor/autoload.php';
 
-use App\ApiClient;
-use App\Controller\Controller;
+use App\Controllers\Controller;
 use Symfony\Component\Dotenv\Dotenv;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
@@ -11,15 +10,13 @@ use Twig\Loader\FilesystemLoader;
 $dotenv = new Dotenv();
 $dotenv->load(__DIR__.'/.env');
 
-$loader = new FilesystemLoader('app/View');
+$loader = new FilesystemLoader('app/Views');
 $twig = new Environment($loader);
 
-$test = new ApiClient();
 $controller = new Controller(5, $twig);
 
 $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
-    $r->addRoute('GET', '/home', [Controller::class, 'home']);
-    $r->addRoute('GET', '/random', [Controller::class, 'random']);
+    $r->addRoute('GET', '/', [Controller::class, 'trending']);
     $r->addRoute('GET', '/trending', [Controller::class, 'trending']);
     $r->addRoute('GET', '/search', [Controller::class, 'search']);
 });
@@ -46,5 +43,8 @@ switch ($routeInfo[0]) {
         [$controllerBase, $method] = $handler;
         $controller = new $controllerBase(5, $twig);
         $response = $controller->{$method}();
+
+        echo $twig->render($response->getPath() . '.html.twig', $response->getInfo());
+
         break;
 }

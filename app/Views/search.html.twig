@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search</title>
+</head>
+<body>
+<form action="/search" method="GET">
+    <label for="search">Search</label>
+    <input type="text" id="search" name="q">
+    <button type="submit">Search</button>
+</form>
+
+{% if gifs is defined %}
+    <h2>Search Results:</h2>
+    {% for gif in gifs %}
+        <div>
+            <h3>{{ gif.getTitle() }}</h3>
+            <img src="{{ gif.getOriginalUrl() }}" alt="{{ gif.getTitle() }}">
+        </div>
+    {% endfor %}
+{% endif %}
+</body>
+</html>
